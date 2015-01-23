@@ -42,7 +42,7 @@ COMPILE_FLAGS_OPT="-O3 $COMPILE_FLAGS"
 COMPILE_FLAGS="-O1 $COMPILE_FLAGS"
 
 set -e
-<<COMMENT
+
 mkdir -p $BIGINT_OUTDIR
 
 echo "== Building BigInt lib =="
@@ -52,7 +52,7 @@ for srcfile in $BIGINT_SRCS; do
   echo $buildcmd
   $buildcmd
 done
-COMMENT
+
 mkdir -p $ZXING_OUTDIRS
 
 echo "== Building zxing =="
@@ -93,6 +93,3 @@ echo $buildcmd
 $buildcmd
 
 echo "== DONE =="
-
-cp "$COMPILE_OUTDIR"/* ../../code/web/barcode/app/scripts
-cp "$COMPILE_OUTDIR"/*.mem ../../code/web/barcode/app
