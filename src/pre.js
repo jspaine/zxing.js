@@ -1,0 +1,2 @@
+var BarcodeReader = (function() {
+  
