@@ -1,3 +1,10 @@
 [
-  "_get_result"
+  "_decode",
+  "_decode_status",
+  "_error_string",
+  "_num_results",
+  "_result_string",
+  "_result_format",
+  "_num_result_points",
+  "_result_points"
 ]

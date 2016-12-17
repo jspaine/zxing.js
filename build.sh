@@ -26,53 +26,64 @@ for file in $ZXING_FILES; do
   fi
 done
 
-WRAPPER_SRCDIR=src
+WRAPPER_SRCDIR=src/emscripten
 WRAPPER_INCLUDES="$ZXING_INCLUDES"
 WRAPPER_SRCS="wrapper.cpp ImageDataSource.cpp"
 WRAPPER_OUTDIR=build/wrapper
 
-COMPILE_PREJS=src/pre.js
-COMPILE_POSTJS=src/post.js
-COMPILE_TARGET=barcodereader.js
-COMPILE_TARGET_OPT=barcodereader.min.js
-COMPILE_OUTDIR=dist
-COMPILE_FLAGS="-s DISABLE_EXCEPTION_CATCHING=0 -s ALLOW_MEMORY_GROWTH=1 -s ASM_JS=1 -s EXPORTED_FUNCTIONS=@exported_functions.json"
+COMPILE_PREJS=src/emscripten/pre.js
+COMPILE_POSTJS=src/emscripten/post.js
+COMPILE_TARGET=zxing-module.js
+COMPILE_OUTDIR=src
+COMPILE_FLAGS="-s EXPORTED_FUNCTIONS=@exported_functions.json"
 COMPILE_FLAGS="$COMPILE_FLAGS --pre-js $COMPILE_PREJS --post-js $COMPILE_POSTJS"
-COMPILE_FLAGS_OPT="-O3 $COMPILE_FLAGS"
-COMPILE_FLAGS="-O1 $COMPILE_FLAGS"
+COMPILE_FLAGS="--llvm-lto 1 --memory-init-file 0 -Oz -s DISABLE_EXCEPTION_CATCHING=0 -s NO_FILESYSTEM=1 $COMPILE_FLAGS"
 
 set -e
 
-mkdir -p $BIGINT_OUTDIR
+if [[ ! -d "${BIGINT_OUTDIR}" ]] ; then
+  mkdir -p $BIGINT_OUTDIR
 
-echo "== Building BigInt lib =="
+  echo "== Building BigInt =="
 
-for srcfile in $BIGINT_SRCS; do
-  buildcmd="$CC $CCFLAGS $BIGINT_INCLUDES $BIGINT_SRCDIR/$srcfile -o $BIGINT_OUTDIR/${srcfile%.*}.bc"
-  echo $buildcmd
-  $buildcmd
-done
+  for srcfile in $BIGINT_SRCS; do
+    buildcmd="$CC $CCFLAGS $BIGINT_INCLUDES $BIGINT_SRCDIR/$srcfile -o $BIGINT_OUTDIR/${srcfile%.*}.bc"
+    echo $buildcmd
+    $buildcmd
+  done
 
-mkdir -p $ZXING_OUTDIRS
+else
+  echo "!! Skipping bigint (remove ${BIGINT_OUTDIR} to rebuild) !!"
+fi
 
-echo "== Building zxing =="
+if [[ ! -d "${ZXING_OUTDIR}/oned" ]] ; then
+  mkdir -p $ZXING_OUTDIRS
+  BUILD_ZXING=true
+  echo "== Building zxing =="
+else
+  echo "!! Skipping zxing (remove ${ZXING_OUTDIR} to rebuild) !!"
+fi
 
 for srcfile in $ZXING_SRCFILES; do
   temp=${srcfile/$ZXING_BASEDIR/$ZXING_OUTDIR}
   outfile="${temp%.*}.bc"
   ZXING_BCFILES="$ZXING_BCFILES $outfile"
-  buildcmd="$CC $CCFLAGS $ZXING_INCLUDES $srcfile -o $outfile"  
-  echo $buildcmd
-  $buildcmd
+  buildcmd="$CC $CCFLAGS $ZXING_INCLUDES $srcfile -o $outfile"
+  if [[ "$BUILD_ZXING" = true ]] ; then
+    echo $buildcmd
+    $buildcmd
+  fi
 done
 
-mkdir -p $WRAPPER_OUTDIR
+
+if [[ ! -d "${WRAPPER_OUTDIR}" ]] ; then
+  mkdir -p $WRAPPER_OUTDIR
+fi
 
 echo "== Building wrapper =="
 
 for srcfile in $WRAPPER_SRCS; do
   buildcmd="$CC $CCFLAGS $WRAPPER_INCLUDES $WRAPPER_SRCDIR/$srcfile -o $WRAPPER_OUTDIR/${srcfile%.*}.bc"
-  echo $buildcmd
   $buildcmd
 done
 
@@ -83,13 +94,6 @@ BIGINT_BCS="$BIGINT_OUTDIR/*.bc"
 echo "== Compiling target =="
 
 buildcmd="$CC $COMPILE_FLAGS $BIGINT_BCS $ZXING_BCFILES $WRAPPER_BCS -o $COMPILE_OUTDIR/$COMPILE_TARGET"
-echo $buildcmd
-$buildcmd
-
-echo "== Compiling target (minified) =="
-
-buildcmd="$CC $COMPILE_FLAGS_OPT $BIGINT_BCS $ZXING_BCFILES $WRAPPER_BCS -o $COMPILE_OUTDIR/$COMPILE_TARGET_OPT"
-echo $buildcmd
 $buildcmd
 
 echo "== DONE =="

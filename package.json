@@ -1,0 +1,43 @@
+{
+  "name": "zxing.js",
+  "version": "0.1.0",
+  "description": "Emscripten port of Zxing barcode reader",
+  "main": "dist/zxing.js",
+  "files": [
+    "dist/zxing.js",
+    "README.md"
+  ],
+  "directories": {
+    "dist": "dist"
+  },
+  "scripts": {
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jspaine/zxing.js.git"
+  },
+  "keywords": [
+    "Zxing",
+    "emscripten",
+    "asm.js",
+    "barcode"
+  ],
+  "author": "James Paine",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jspaine/zxing.js/issues"
+  },
+  "homepage": "https://github.com/jspaine/zxing.js#readme",
+  "devDependencies": {
+    "babel-core": "^6.20.0",
+    "babel-eslint": "^7.1.1",
+    "babel-loader": "^6.2.10",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.18.0",
+    "babel-plugin-transform-object-rest-spread": "^6.20.2",
+    "eslint": "^3.12.2",
+    "webpack": "^1.14.0",
+    "webworkify-webpack": "^2.0.1"
+  },
+  "dependencies": {}
+}
