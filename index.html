@@ -23,9 +23,14 @@
                                navigator.mozGetUserMedia ||
                                navigator.webkitGetUserMedia ||
                                navigator.msGetUserMedia
-
+const constraints = {
+        advanced: [{
+            facingMode: "environment"
+        }]
+    };
       navigator.getUserMedia({
-        video: true
+        video: constraints,
+        
       }, function(stream) {
         video.src = window.URL.createObjectURL(stream)
       }, function(err) {
